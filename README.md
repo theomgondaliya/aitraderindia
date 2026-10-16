@@ -1,2 +1,137 @@
-# aitraderindia
-End-to-end AI signal-automation platform — Python, Node.js, MongoDB, Telegram Bot API. Built and run solo to paying subscribers.
+# AI Trader India — AI Signal Automation Platform
+
+> An end-to-end, AI-powered signal platform **designed, built and operated entirely solo** — from system architecture and backend engineering to payment workflows and production monitoring.
+
+![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-5FA04E?logo=nodedotjs&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white)
+![Telegram](https://img.shields.io/badge/Telegram_Bot_API-26A5E4?logo=telegram&logoColor=white)
+![Automation](https://img.shields.io/badge/Workflow_Automation-FF6951)
+
+**Role:** Sole builder — system design · backend · AI/automation · payments · ops
+**Timeline:** Jan 2026 – May 2026
+**Status:** Ran live in production
+
+> ℹ️ The product delivered informational/educational market signals. This repository documents the **engineering and automation** behind it, not the trading content itself.
+
+---
+
+## Overview
+
+AI Trader India is a production platform that generates, formats and delivers real-time trading signals to subscribers over Telegram, manages paid access, and monitors itself — all with **no manual intervention** in the day-to-day loop.
+
+I built every layer myself: the signal engine, the delivery bot, the subscription and access system, a deliberately fraud-resistant payment flow, and a monitoring pipeline. The goal was to prove that one person could design and automate an entire subscription operation so it effectively runs itself.
+
+## The problem
+
+Running a paid signal service by hand doesn't scale and breaks easily:
+
+- **Timing is everything** — signals must be generated, formatted and delivered on time, every time. A human can't be awake 24/7.
+- **Access must be controlled** — only paying members should receive premium signals, and access has to be granted and revoked reliably.
+- **Payments attract fraud** — manual UPI payments invite fake screenshots and chargebacks.
+- **Failures are silent** — if a bot or job dies at 2 a.m., you need to know immediately, not the next morning.
+
+The challenge was to turn all of that into software that handles itself.
+
+## Goals
+
+1. Fully automate signal generation → formatting → delivery with zero manual steps.
+2. Make paid access self-managing and tamper-resistant.
+3. Design a payment flow that minimises fraud without a heavy payment-gateway dependency.
+4. Build observability so the system reports its own health and failures.
+5. Own the full lifecycle solo — and keep it maintainable.
+
+## System architecture
+
+```
+                 ┌───────────────────────────┐
+                 │      AI Signal Engine       │   Python + Node.js
+                 │  generate · format · rank   │
+                 └──────────────┬──────────────┘
+                                │ structured signal
+                                ▼
+   ┌────────────────────────────────────────────────────────┐
+   │                  Delivery & Bot Layer                    │
+   │              Telegram Bot API (push to users)            │
+   └───────────────┬───────────────────────┬─────────────────┘
+                   │                         │
+                   ▼                         ▼
+        ┌────────────────────┐    ┌────────────────────────┐
+        │  Subscription &     │    │  Payment Verification   │
+        │  Access Control     │◄──►│  (UPI, fraud checks)    │
+        └─────────┬──────────┘    └────────────────────────┘
+                  │
+                  ▼
+            ┌──────────┐
+            │ MongoDB  │  members · access state · signal history
+            └──────────┘
+                  │
+                  ▼
+        ┌────────────────────────────┐
+        │   Monitoring & Logging       │  Discord webhooks
+        │   status · errors · alerts   │
+        └────────────────────────────┘
+```
+<!-- Swap this ASCII sketch for a real diagram or a screenshot of the bot when you can -->
+
+### 1. AI Signal Engine · `Python` `Node.js` `AI/LLM`
+The core service. It generates real-time entry, exit and stop-loss signals, then formats them into a clean, consistent message structure before they ever reach a user. Built to run continuously as a scheduled, always-on process.
+
+### 2. Delivery & Bot Layer · `Telegram Bot API`
+A Telegram bot handles all member-facing communication — pushing signals to the right channels/users, responding to commands, and acting as the interface between the automation and the subscriber.
+
+### 3. Subscription & Access Control · `MongoDB`
+Member records, plan state and access rights live in MongoDB. Access is granted and tracked programmatically so premium content only reaches paid, active members.
+
+### 4. Payment Verification (fraud-prevention)
+A deliberate design choice: payments go through a **manual UPI verification step** rather than blind auto-approval. This was a conscious control to defend against **fake payment screenshots and chargebacks** — trading reliability of verification against pure convenience. It's the kind of trade-off I'd now revisit with a gateway webhook (see roadmap).
+
+### 5. Scheduling & Distribution · `REST APIs`
+Content scheduling and distribution workflows automate *when* and *how* messages go out, so the platform grew through organic reach and targeted ad campaigns without manual posting.
+
+### 6. Monitoring & Logging · `Discord Webhooks`
+The system watches itself. Status updates, errors and alerts are routed to a Discord channel in real time, giving a lightweight, zero-cost observability layer for record-keeping, debugging and ongoing maintenance.
+
+## Data flow
+
+1. The **signal engine** produces a signal and formats it.
+2. The **bot layer** pushes it to subscribers via the Telegram Bot API.
+3. **Access control** ensures only active, paid members receive premium signals.
+4. New payments hit the **verification flow**; once confirmed, access is updated in **MongoDB**.
+5. Every meaningful event (and every failure) is logged to **Discord** for monitoring.
+
+## Tech stack & why
+
+| Layer | Tech | Why |
+|---|---|---|
+| Signal logic | **Python** | Fast to iterate on data/logic-heavy work |
+| Services & bot | **Node.js** | Event-driven, great for always-on bot I/O |
+| Data | **MongoDB** | Flexible schema for evolving member/signal data |
+| Delivery | **Telegram Bot API** | Where the audience already was |
+| Integration | **REST APIs** | Glue between scheduling, access and delivery |
+| Observability | **Discord Webhooks** | Real-time alerts with zero infra overhead |
+
+## Key engineering decisions
+
+- **Automation-first:** every recurring task was designed to run without me. If a step needed a human daily, it got redesigned.
+- **Fraud-aware payments:** chose verification robustness over frictionless checkout — a reasoned trade-off, not an accident.
+- **Cheap, real observability:** Discord webhooks gave production-grade visibility without standing up a monitoring stack.
+- **Single-owner maintainability:** kept the moving parts few and well-separated so one person could operate the whole thing.
+
+## What I learned
+
+- Shipping a *system* is very different from writing a script — state, failure modes and money all have to be handled.
+- Good monitoring is what lets a solo builder sleep; design for failure from day one.
+- The boring parts (access control, payment edge cases) are where real product trust is won or lost.
+
+## Roadmap / what I'd build next
+
+- Move payment verification to a **payment-gateway webhook** for automatic reconciliation
+- Add **CI/CD and automated tests** around the signal engine
+- Build an **admin dashboard** for members, payments and signal history
+- Containerise and add health-check-based auto-restart
+
+---
+
+**Built by Om Gondaliya** — Product Designer & builder who ships the system behind the product.
+📧 theomgondaliya@gmail.com &nbsp;·&nbsp; 🔗 [linktr.ee/omgondaliya](https://linktr.ee/omgondaliya) &nbsp;·&nbsp; 💼 [linkedin.com/in/omgondaliya](https://linkedin.com/in/omgondaliya)
