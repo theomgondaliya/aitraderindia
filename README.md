@@ -2,15 +2,11 @@
 
 > An end-to-end, AI-powered signal platform **designed, built and operated entirely solo** — from system architecture and backend engineering to payment workflows and production monitoring.
 
-![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-5FA04E?logo=nodedotjs&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white)
-![Telegram](https://img.shields.io/badge/Telegram_Bot_API-26A5E4?logo=telegram&logoColor=white)
-![Automation](https://img.shields.io/badge/Workflow_Automation-FF6951)
+![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white) ![Node.js](https://img.shields.io/badge/Node.js-5FA04E?logo=nodedotjs&logoColor=white) ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white) ![Telegram](https://img.shields.io/badge/Telegram_Bot_API-26A5E4?logo=telegram&logoColor=white) ![Automation](https://img.shields.io/badge/Workflow_Automation-FF6951)
 
-**Role:** Sole builder — system design · backend · AI/automation · payments · ops
-**Timeline:** Jan 2026 – May 2026
-**Status:** Ran live in production
+**Role:** Sole builder — system design · backend · AI/automation · payments · ops · web  
+**Timeline:** Jan 2026 – present  
+**Status:** Live in production
 
 > ℹ️ The product delivered informational/educational market signals. This repository documents the **engineering and automation** behind it, not the trading content itself.
 
@@ -72,24 +68,29 @@ The challenge was to turn all of that into software that handles itself.
         │   status · errors · alerts   │
         └────────────────────────────┘
 ```
-<!-- Swap this ASCII sketch for a real diagram or a screenshot of the bot when you can -->
 
 ### 1. AI Signal Engine · `Python` `Node.js` `AI/LLM`
+
 The core service. It generates real-time entry, exit and stop-loss signals, then formats them into a clean, consistent message structure before they ever reach a user. Built to run continuously as a scheduled, always-on process.
 
 ### 2. Delivery & Bot Layer · `Telegram Bot API`
+
 A Telegram bot handles all member-facing communication — pushing signals to the right channels/users, responding to commands, and acting as the interface between the automation and the subscriber.
 
 ### 3. Subscription & Access Control · `MongoDB`
+
 Member records, plan state and access rights live in MongoDB. Access is granted and tracked programmatically so premium content only reaches paid, active members.
 
 ### 4. Payment Verification (fraud-prevention)
+
 A deliberate design choice: payments go through a **manual UPI verification step** rather than blind auto-approval. This was a conscious control to defend against **fake payment screenshots and chargebacks** — trading reliability of verification against pure convenience. It's the kind of trade-off I'd now revisit with a gateway webhook (see roadmap).
 
 ### 5. Scheduling & Distribution · `REST APIs`
+
 Content scheduling and distribution workflows automate *when* and *how* messages go out, so the platform grew through organic reach and targeted ad campaigns without manual posting.
 
 ### 6. Monitoring & Logging · `Discord Webhooks`
+
 The system watches itself. Status updates, errors and alerts are routed to a Discord channel in real time, giving a lightweight, zero-cost observability layer for record-keeping, debugging and ongoing maintenance.
 
 ## Data flow
@@ -100,16 +101,38 @@ The system watches itself. Status updates, errors and alerts are routed to a Dis
 4. New payments hit the **verification flow**; once confirmed, access is updated in **MongoDB**.
 5. Every meaningful event (and every failure) is logged to **Discord** for monitoring.
 
+## Phase 2 — IPO desk: website + alert bot (Oct 2026)
+
+A second product on the same foundations: a fast, search-friendly website and a Telegram bot that keep Indian IPO information current without manual work.
+
+**What it does**
+- Tracks every open and upcoming IPO and keeps one page per IPO up to date: dates, price band, lot size, allotment links and listing result.
+- A home-page calendar and IPO board, rebuilt automatically whenever a number changes.
+- Telegram posts for each stage of an IPO (new, opening day, last day, allotment, listing), edited in place when a detail is corrected instead of posting twice.
+- SME-specific rules handled correctly (for example the 2-lot minimum bid) and shown in rupees.
+
+**Engineering highlights**
+- **Static generation, no database on the web path.** A Python generator writes plain HTML; nginx serves it. Pages are written atomically per file, so a visitor never sees a half-built page. Works with JavaScript off.
+- **Self-updating schedule.** Data is re-checked every 15 minutes; each IPO then takes its turn one minute apart, so the load is spread evenly and a failure in one step cannot block the others.
+- **Polite and fault-tolerant by design.** Every outside read respects robots.txt, backs off when refused, and reports a changed page layout instead of guessing. One failing source never stops the rest.
+- **Safe by default.** Secrets only in environment files, never logged; owner commands for status and manual overrides; admin alerts on anything unusual.
+- **Tested like a product.** 470+ automated tests (bot logic, page output, real nginx behaviour, 18 phone widths for layout), plus an SEO/answer-engine audit script that runs on every build.
+- **Traceable decisions.** Cross-checks IPO dates, price bands and lot sizes between independent sources and alerts me on any mismatch rather than silently trusting one.
+
+> ℹ️ This repository documents the **engineering**, not the market content. Nothing here is investment advice.
+
 ## Tech stack & why
 
-| Layer | Tech | Why |
-|---|---|---|
-| Signal logic | **Python** | Fast to iterate on data/logic-heavy work |
-| Services & bot | **Node.js** | Event-driven, great for always-on bot I/O |
-| Data | **MongoDB** | Flexible schema for evolving member/signal data |
-| Delivery | **Telegram Bot API** | Where the audience already was |
-| Integration | **REST APIs** | Glue between scheduling, access and delivery |
-| Observability | **Discord Webhooks** | Real-time alerts with zero infra overhead |
+| Layer          | Tech                                | Why                                                 |
+|----------------|-------------------------------------|-----------------------------------------------------|
+| Signal logic   | **Python**                          | Fast to iterate on data/logic-heavy work            |
+| Services & bot | **Node.js**                         | Event-driven, great for always-on bot I/O           |
+| Data           | **MongoDB**                         | Flexible schema for evolving member/signal data     |
+| Delivery       | **Telegram Bot API**                | Where the audience already was                      |
+| Integration    | **REST APIs**                       | Glue between scheduling, access and delivery        |
+| Observability  | **Discord Webhooks**                | Real-time alerts with zero infra overhead           |
+| Website        | **Python static generator + nginx** | Fast, cacheable, no moving parts on the public path |
+| Scheduling     | **APScheduler + pm2**               | Always-on jobs with automatic restart               |
 
 ## Key engineering decisions
 
@@ -127,11 +150,11 @@ The system watches itself. Status updates, errors and alerts are routed to a Dis
 ## Roadmap / what I'd build next
 
 - Move payment verification to a **payment-gateway webhook** for automatic reconciliation
-- Add **CI/CD and automated tests** around the signal engine
+- ✅ Automated tests around the bot and the website (470+); next: run them automatically on every commit (CI)
 - Build an **admin dashboard** for members, payments and signal history
 - Containerise and add health-check-based auto-restart
 
 ---
 
-**Built by Om Gondaliya** — Product Designer & builder who ships the system behind the product.
-📧 theomgondaliya@gmail.com &nbsp;·&nbsp; 🔗 [linktr.ee/omgondaliya](https://linktr.ee/omgondaliya) &nbsp;·&nbsp; 💼 [linkedin.com/in/omgondaliya](https://linkedin.com/in/omgondaliya)
+**Built by Om Gondaliya** — Product Designer & builder who ships the system behind the product.  
+📧 theomgondaliya@gmail.com  ·  🔗 [linktr.ee/omgondaliya](https://linktr.ee/omgondaliya)  ·  💼 [linkedin.com/in/omgondaliya](https://linkedin.com/in/omgondaliya)
