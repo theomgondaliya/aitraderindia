@@ -1,5 +1,7 @@
 # AI Trader India — AI Signal Automation Platform
 
+🌐 **Live website:** [aitraderindia.online](https://aitraderindia.online/)  ·  📢 **IPO alerts:** [t.me/AITraderIndiaIPO](https://t.me/AITraderIndiaIPO)
+
 > An end-to-end, AI-powered signal platform **designed, built and operated entirely solo** — from system architecture and backend engineering to payment workflows and production monitoring.
 
 ![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white) ![Node.js](https://img.shields.io/badge/Node.js-5FA04E?logo=nodedotjs&logoColor=white) ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white) ![Telegram](https://img.shields.io/badge/Telegram_Bot_API-26A5E4?logo=telegram&logoColor=white) ![Automation](https://img.shields.io/badge/Workflow_Automation-FF6951)
@@ -103,13 +105,16 @@ The system watches itself. Status updates, errors and alerts are routed to a Dis
 
 ## Phase 2 — IPO desk: website + alert bot (Oct 2026)
 
-A second product on the same foundations: a fast, search-friendly website and a Telegram bot that keep Indian IPO information current without manual work.
+A second product on the same foundations: a fast, search-friendly website ([aitraderindia.online](https://aitraderindia.online/)) and a Telegram bot that keep Indian IPO information current without manual work.
 
 **What it does**
 - Tracks every open and upcoming IPO and keeps one page per IPO up to date: dates, price band, lot size, allotment links and listing result.
 - A home-page calendar and IPO board, rebuilt automatically whenever a number changes.
 - Telegram posts for each stage of an IPO (new, opening day, last day, allotment, listing), edited in place when a detail is corrected instead of posting twice.
 - SME-specific rules handled correctly (for example the 2-lot minimum bid) and shown in rupees.
+- Shows the grey market premium (GMP) for every IPO that has not yet listed, with the estimated listing price and the gain on one lot (an SME's smallest bid is 2 lots), coloured green for a gain and red for a loss.
+- Links each IPO to its own allotment-status page at the registrar as soon as allotment day arrives, on the website and in the Telegram post.
+- Keeps the data fresh on a fixed 15-minute loop, one IPO per minute, from the first IPO in the list to the last.
 
 **Engineering highlights**
 - **Static generation, no database on the web path.** A Python generator writes plain HTML; nginx serves it. Pages are written atomically per file, so a visitor never sees a half-built page. Works with JavaScript off.
@@ -157,4 +162,4 @@ A second product on the same foundations: a fast, search-friendly website and a 
 ---
 
 **Built by Om Gondaliya** — Product Designer & builder who ships the system behind the product.  
-📧 theomgondaliya@gmail.com  ·  🔗 [linktr.ee/omgondaliya](https://linktr.ee/omgondaliya)  ·  💼 [linkedin.com/in/omgondaliya](https://linkedin.com/in/omgondaliya)
+📧 theomgondaliya@gmail.com  ·  🌐 [aitraderindia.online](https://aitraderindia.online/)  ·  🔗 [linktr.ee/omgondaliya](https://linktr.ee/omgondaliya)  ·  💼 [linkedin.com/in/omgondaliya](https://linkedin.com/in/omgondaliya)
